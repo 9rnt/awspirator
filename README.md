@@ -1,7 +1,9 @@
 # awspirator
 Simple script to collect all readable AWS secrets in secret manager from an AWS account
 
+
 usage: cli.py [-h] [--profile PROFILE] [--role-arn ROLE_ARN] [--external-id EXTERNAL_ID] [--output OUTPUT] [--file-path FILE_PATH] [--verbose]
+
 options:
   -h, --help            show this help message and exit
   --profile PROFILE     Specify the aws profile (default is default)
