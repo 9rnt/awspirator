@@ -1,6 +1,6 @@
 import logging
 import argparse
-from awspirateur import awspirateur
+from modules.secret_util import retrieve_secrets, retrieve_secrets_from_all_regions
 from modules.sts_util import get_session
 from modules.output import write_to_json_file, write_dict_to_csv
 
@@ -12,6 +12,7 @@ def cli():
     parser.add_argument('--profile', dest='profile', help='Specify the aws profile (default is default)')
     parser.add_argument('--role-arn', dest='role_arn', help='Specify the aws role to be assumed')
     parser.add_argument('--external-id', dest='external_id', help='Specify the aws role to be assumed')
+    parser.add_argument('--parameter-store', dest='parameter_store', help='Specify if you want to retrieve secrets from the parameter store in addition to secrets manager', default=False)
     parser.add_argument('--output', dest='output', help='Specify the output type csv, json')
     parser.add_argument('--file-path', dest='file_path', help='Specify the path for the file to store the secrets')
     parser.add_argument('--verbose', '-v', dest='verbose', action='count', default=0)
@@ -30,7 +31,9 @@ def cli():
 
     # get an aws session
     session = get_session(log, args.profile, args.role_arn, args.external_id)
-    data=awspirateur(log,session)
+    secrets=retrieve_secrets(log,session)
+    parameter_store_secrets=retrieve_secrets_from_all_regions(log,session)
+    data=secrets+parameter_store_secrets
 
 
     if args.output=="json":
