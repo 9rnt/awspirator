@@ -9,6 +9,8 @@ A Python utility for retrieving secrets from AWS Secrets Manager and Parameter S
 - Handles pagination for large sets of secrets
 - Provides detailed logging for tracking retrieval progress and potential issues
 - Supports error handling for insufficient permissions
+- Flexible output formats (JSON, CSV, or console output)
+- Support for AWS profiles and role assumption
 
 ## Prerequisites
 
@@ -18,79 +20,43 @@ A Python utility for retrieving secrets from AWS Secrets Manager and Parameter S
   - boto3
   - botocore
 
-## Required Permissions
+## Installation
+```bash
+git clone https://github.com/yourusername/awspirator.git
+cd awspirator
+pip install -r requirements.txt
+```
+## CLI Usage
+```bash
+python cli.py [options]
+```
+### Options
 
-The following AWS IAM permissions are needed:
+- `--profile`: Specify the AWS profile (default is 'default')
+- `--role-arn`: Specify the AWS role to be assumed
+- `--external-id`: Specify the external ID for role assumption
+- `--parameter-store`: Include Parameter Store secrets in addition to Secrets Manager
+- `--output`: Specify output format (csv, json)
+- `--file-path`: Specify the path for the output file
+- `-v, --verbose`: Increase verbosity level (can be used multiple times)
+  - `-v`: WARN level
+  - `-vv`: INFO level
+  - `-vvv`: DEBUG level
 
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeRegions",
-                "secretsmanager:ListSecrets",
-                "secretsmanager:GetSecretValue",
-                "ssm:GetParametersByPath",
-                "ssm:GetParameters"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
+### Examples
+
+```bash
+python cli.py --profile myprofile --role-arn arn:aws:iam::123456789012:role/MyRole --external-id 1234567890 --parameter-store --output csv --file-path secrets.csv -vvv
 ```
 
-## Usage
+## Required AWS Permissions
 
-```python
-import boto3
-import logging
-from modules.secret_util import retrieve_secrets, retrieve_secrets_from_all_regions
+- `secretsmanager:GetSecretValue`
+- `ssm:GetParameter`
+- `ssm:GetParameterHistory`
+- `sts:AssumeRole`
+- `sts:GetCallerIdentity`
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+## License
 
-# Create AWS session
-session = boto3.Session()
-
-# Retrieve secrets from AWS Secrets Manager
-secrets_manager_secrets = retrieve_secrets(log, session)
-
-# Retrieve secrets from Parameter Store
-parameter_store_secrets = retrieve_secrets_from_all_regions(log, session)
-
-# Combine all secrets
-all_secrets = secrets_manager_secrets + parameter_store_secrets
-```
-
-## Output Format
-
-The tool returns a list of dictionaries containing secret information:
-
-### Secrets Manager Format
-```python
-{
-    "ARN": "arn:aws:secretsmanager:region:account:secret:name",
-    "Name": "secret-name",
-    "SecretString": "secret-value",
-    "Type": "SecretsManagerSecretString"
-}
-```
-
-### Parameter Store Format
-```python
-{
-    "ARN": "arn:aws:ssm:region:account:parameter/name",
-    "Name": "/parameter/name",
-    "SecretString": "parameter-value",
-    "Type": "ParameterStoreSecureString"
-}
-```
-
-## Error Handling
-
-- The tool provides detailed logging for tracking progress and issues
-- Failed secret retrievals are logged but don't stop the overall process
-- Permission-related issues are handled gracefully with appropriate logging
+This project is licensed under the MIT License - see the LICENSE file for details.
